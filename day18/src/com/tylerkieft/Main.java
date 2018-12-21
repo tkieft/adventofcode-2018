@@ -61,15 +61,13 @@ public class Main {
     return newArea;
   }
 
-  private static int getValue(List<List<Character>> area) {
+  private static int getValue(String area) {
     int lumberyards = 0;
     int trees = 0;
 
-    for (List<Character> row : area) {
-      for (Character character : row) {
-        if (character == '|') trees++;
-        if (character == '#') lumberyards++;
-      }
+    for (char c : area.toCharArray()) {
+      if (c == '|') trees++;
+      if (c == '#') lumberyards++;
     }
 
     return lumberyards * trees;
@@ -87,7 +85,7 @@ public class Main {
       i++;
     }
 
-    System.out.println(getValue(area));
+    System.out.println(getValue(areaToString(area)));
 
     // Part 2
     Map<String, Integer> cache = new HashMap<>();
@@ -98,15 +96,26 @@ public class Main {
       String areaString = areaToString(area);
 
       if (cache.get(areaString) != null) {
-        int difference = i - cache.get(areaString);
-        i += ((NUM_ITERATIONS - i) / difference) * difference;
+        // We're repeating. Find the value at the NUM_ITERATIONS iteration
+        int originalIteration = cache.get(areaString);
+        int difference = i - originalIteration;
+        int moveForward = (NUM_ITERATIONS - 1 - i) % difference;
+
+        System.out.println(
+            getValue(
+                cache.entrySet()
+                    .stream()
+                    .filter(e -> e.getValue() == (moveForward + originalIteration))
+                    .findFirst()
+                    .get()
+                    .getKey()));
+
+        break;
       } else {
         cache.put(areaString, i);
       }
       i++;
     }
-
-    System.out.println(getValue(area));
   }
 
   private static String areaToString(List<List<Character>> area) {
