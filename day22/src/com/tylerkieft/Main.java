@@ -12,8 +12,8 @@ public class Main {
   private static final int TARGET_Y = 701;
   private static final int DEPTH = 11394;
 
-  private static final int BUFFER_X = 50;
-  private static final int BUFFER_Y = 120;
+  private static final int BUFFER_X = 40;
+  private static final int BUFFER_Y = 100;
 
   private static final Long[][] sGeologicIndexCache = new Long[TARGET_X + 1 + BUFFER_X][TARGET_Y + 1 + BUFFER_Y];
   private static final Integer[][] sRiskLevelCache = new Integer[TARGET_X + 1 + BUFFER_X][TARGET_Y + 1 + BUFFER_Y];
@@ -113,13 +113,12 @@ public class Main {
 
     // Do Djikstra's
     Map<Vertex, Integer> distance = new HashMap<>();
-    Queue<Vertex> queue = new ArrayDeque<>();
+    Set<Vertex> queue = new HashSet<>();
 
     for (int x = 0; x <= xLimit; x++) {
       for (int y = 0; y <= yLimit; y++) {
         for (Vertex vertex : map[x][y]) {
           distance.put(vertex, Integer.MAX_VALUE);
-          queue.add(vertex);
         }
       }
     }
@@ -128,18 +127,20 @@ public class Main {
     Vertex endVertex = map[TARGET_X][TARGET_Y].get(0);
 
     distance.put(startVertex, 0);
+    queue.add(startVertex);
 
     while (!queue.isEmpty()) {
       Vertex min = queue.stream().min(Comparator.comparingInt(distance::get)).get();
+      queue.remove(min);
 
       if (endVertex == min) {
         break;
       }
 
-      queue.remove(min);
       for (Edge edge : min.edges) {
         if (distance.get(edge.v) > distance.get(min) + edge.cost) {
           distance.put(edge.v, distance.get(min) + edge.cost);
+          queue.add(edge.v);
         }
       }
     }
